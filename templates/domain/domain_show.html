@@ -1,0 +1,203 @@
+{% extends 'base.html'%}
+{% block self_head_css_js %}
+    <style>
+        .hide{
+            display: none;
+        }
+        /* 遮罩层 */
+        .shade{
+            position:fixed;
+            z-index:1040;
+            top:0;left:0;right:0;bottom:0;
+            background-color:#999;filter:alpha(opacity=50); -moz-opacity:0.5;opacity:0.5;
+        }
+        /* 模态对话框 */
+        .motai{
+            position: fixed;
+            z-index: 1050;
+            width: 400px;
+            height: 260px;
+            background-color: beige;
+            top:50%;
+            left:50%;
+            margin-left: -200px;
+            margin-top: -200px;
+        }
+    </style>
+    <!--link rel="stylesheet" href="/static/js/data-tables/DT_bootstrap.css" />
+    <link rel="stylesheet" href="/static/sweetalert/sweetalert.css" --/>
+{% endblock %}
+
+{% block content %}
+<!-- page heading start-->
+<div class="page-heading">
+	<h3>
+	域名管理
+	</h3>
+	<ul class="breadcrumb">
+		<li>
+			<a href="/">首页</a>
+		</li>
+		<li class="active"> 域名管理 </li>
+	</ul>
+</div>
+<!-- page heading end-->
+
+<!--body wrapper start-->
+<div class="wrapper">
+    <div class="row">
+        <div class="col-sm-12">
+            <section class="panel">
+                <header class="panel-heading">
+                    域名管理
+                    <span class="tools pull-right">
+                        <a href="javascript:;" class="fa fa-chevron-down"></a>
+                        <a href="javascript:;" class="fa fa-times"></a>
+                     </span>
+                </header>
+                <div class="panel-body">
+                    <div class="adv-table editable-table ">
+                        <div class="clearfix">
+                            <div class="btn-group">
+                                <button id="tjym" class="btn btn-primary" {% if request.session.role_id != 2 %} disabled {% endif %}>
+                                    <a href="{% url 'domain_add' %}">添加域名 <i class="fa fa-plus"></i></a>
+                                </button>
+                                {% if not domain_obj %}
+								<button id="tb" class="btn btn-primary">
+									<a href="{% url 'domain_sync' %}">初始化 <i class="fa"></i></a>
+								</button>
+								{% endif %}
+                            </div>
+                            <div class="btn-group pull-right">
+                                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">Tools <i class="fa fa-angle-down"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-right">
+                                    <li><a href="#">Print</a></li>
+                                    <li><a href="#">Save as PDF</a></li>
+                                    <li><a href="#">Export to Excel</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="space15"></div>
+							{% if error %}
+                            <div class="alert alert-danger alert-block fade in text-center">
+								<button type="button" class="close close-sm" data-dismiss="alert">
+									<i class="fa fa-times"></i>
+								</button>
+								<h4>
+									<i class="icon-ok-sign"></i>
+										Error!
+								</h4>
+								<p>{{error}}</p>
+							</div>
+							{% endif %}
+                            <table class="table  table-hover general-table" id="editable-sample">
+                                <thead>
+                                <tr>
+                                    <th class="text-center"> 域名</th>
+									{% if request.session.role_id == 2 %}
+				    				<th class="text-center"> 查询权限</th>
+									<th class="text-center"> 操作权限</th>
+									{% endif %}
+                                    <th class="text-center"> 操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for domain in domain_obj %}
+                                <tr>
+                                    <td class="text-center">
+                                        <a href="{% url 'record_show' %}?id={{domain.domain_id}}">
+                                            {{ domain.domain_name }}
+                                        </a>
+                                    </td>
+									{% if request.session.role_id == 2 %}
+				    				<td class="text-center">
+									{% for v in domain.visitor.all %}
+									{{v.username}}
+									</br>
+									{% endfor %}
+									</td>
+									<th class="text-center">
+									{% for o in domain.operator.all %}
+									{{o.username}}
+									</br>
+									{% endfor %}
+									</td>
+									{% endif %}
+									<td class="text-center">
+										{% if request.session.role_id == 2 %}
+										<button class="btn btn-success" >
+										<a href="{% url 'domain_appoint' %}?id={{domain.id}}">赋权</a>
+										</button>
+										{% endif %}
+                                        <button class="btn btn-primary" onclick="DeleteDomain('{{domain.domain_id}}')" {% if request.user not in domain.operator.all %} disabled {% endif %}>
+                                            删除
+                                        </button>
+									</td>
+                                </tr>
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+	<!--body wrapper end-->
+
+{% endblock %}
+
+{% block self_footer_js %}
+<!--data table-->
+<!--script type="text/javascript" src="/static/js/data-tables/jquery.dataTables.js"></script>
+<script type="text/javascript" src="/static/js/data-tables/DT_bootstrap.js"></script>
+<script src="/static/js/data-tables/editable-table.js"></script>
+<script src="/static/sweetalert/sweetalert.min.js"></script-->
+<script>
+function DeleteDomain(domain_id){
+    if(confirm("确认要删除吗？")){
+        $.ajaxSetup({data: {csrfmiddlewaretoken: '{{ csrf_token }}' }});
+        $.post("{% url 'domain_del' %}", {"domain_id": domain_id}, function(ret){
+            if (ret.status){
+                alert('删除成功')
+                window.location.reload()
+            }else{
+                alert(ret.error)
+            }
+        },'json');
+    }
+}
+/*
+    swal({
+        title: "删除域名",
+        text: "删除域名同时会将该域名下所有记录删除，确定要删除吗?",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "是的,我要删除",
+        closeOnConfirm: false
+    }, function(){
+        $.ajax({
+            type: 'GET',
+            url: '{% url 'domain_del' %}',
+            data: {'domain_id':domain_id}
+            success: function(callback){
+                var callback = $.parseJSON(callback);
+                if(callback.status){
+                    window.location.reload();
+                }else{
+                    swal("删除失败", callback.error, "error");
+                }
+            }
+        })
+
+    });
+}
+*/
+
+</script>
+
+
+{% endblock %}

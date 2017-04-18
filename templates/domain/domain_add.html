@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block self_head_css_js %}
+<link href="/static/css/plugins/chosen/chosen.css" src="js/jquery-2.1.1.js" rel="stylesheet">
+<script src="/static/js/plugins/chosen/chosen.jquery.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- page heading start-->
+<div class="page-heading">
+	<h3>
+	添加域名
+	</h3>
+	<ul class="breadcrumb">
+		<li>
+			<a href="/">首页</a>
+		</li>
+		<li>
+			<a href="/domain/list">域名管理</a>
+		</li>
+		<li class="active"> 添加域名 </li>
+	</ul>
+</div>
+<!-- page heading end-->
+
+<!--body wrapper start-->
+<div class="wrapper">
+	<div class="row">
+		<div class="col-sm-12">
+		<section class="panel">
+		<header class="panel-heading">
+			添加域名
+			<span class="tools pull-right">
+				<a href="javascript:;" class="fa fa-chevron-down"></a>
+				<a href="javascript:;" class="fa fa-times"></a>
+			</span>
+		</header>
+		<div class="panel-body" id="ymtj">
+			<form action="{% url 'domain_add' %}" method="post" role="form" class="form-horizontal adminex-form">{% csrf_token %}
+				<div class="form-group has-success">
+					<label class="col-lg-2 control-label">域名</label>
+					<div class="col-lg-6">
+						<input type="text" data-trigger="hover" data-original-title="请输入主域名，如meixin.com" data-placement="top" data-toggle="tooltip" placeholder="" id="domain_name" name='domain_name' class="form-control tooltips" required>
+						<p class="help-block"><font color="red">{{error}}</font></p>
+					</div>
+				</div>
+				<div class="form-group has-success">
+					<label class="col-lg-2 control-label">查询权限</label>
+					<div class="col-lg-10">
+						<select name="visitors" id="groups" class=" chosen-select form-control m-b" data-placeholder="请选择赋予查询权限的用户"  multiple tabindex="2">
+							{% for user in users %}
+							<option value='{{ user }}'>{{ user }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+				<div class="form-group has-success">
+					<label class="col-lg-2 control-label">操作权限</label>
+					<div class="col-lg-10">
+						<select name="operators" id="groups" data-placeholder="请选择赋予操作权限的用户" class="form-control chosen-select m-b" multiple tabindex="2">
+							{% for user in users %}
+							<option value='{{ user }}'>{{ user }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-lg-offset-2 col-lg-10">
+						<button class="btn btn-primary" type="submit" onclick="checkdomain();">Submit</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</section>
+
+	</div>
+	</div>
+	</div>
+
+
+{% endblock %}
+
+{% block self_footer_js %}
+<!--data table-->
+
+<script type="text/javascript">
+
+
+var config = {
+                '.chosen-select'           : {},
+                '.chosen-select-deselect'  : {allow_single_deselect:true},
+                '.chosen-select-no-single' : {disable_search_threshold:10},
+                '.chosen-select-no-results': {no_results_text:'Oops, nothing found!'},
+                '.chosen-select-width'     : {width:"95%"}
+};
+
+
+for (var selector in config) {
+        $(selector).chosen(config[selector]);
+}
+
+function checkdomain()
+{
+	var domain_name = $('#domain_name').val();
+	var reg =/^[0-9a-zA-Z]+[0-9a-zA-Z\.-]*\.[a-zA-Z]{2,4}$/;
+	var r = domain_name.match(reg);
+	if (domain_name.length == 0)
+		{
+			alert('域名不能为空');
+		}
+	else if (r == null)
+		{
+			alert('错误的域名格式，请重新输入');
+		}
+}
+
+</script>
+
+
+
+
+{% endblock %}

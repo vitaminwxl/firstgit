@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block self_head_css_js %}
+<link href="/static/js/advanced-datatable/css/demo_page.css" rel="stylesheet" />
+<link href="/static/js/advanced-datatable/css/demo_table.css" rel="stylesheet" />
+<link rel="stylesheet" href="/static/js/data-tables/DT_bootstrap.css" />
+{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <h3>
+	    角色管理
+    </h3>
+	<ul class="breadcrumb">
+		<li>
+			<a href="/">首页</a>
+	    </li>
+		<li class="active"> 用户管理 </li>
+	</ul>
+</div>
+
+<div class="wrapper">
+	<div class="row">
+		<div class="col-sm-12">
+			<section class="panel">
+				<header class="panel-heading">
+					用户列表
+					<span class="tools pull-right">
+						<a href="javascript:;" class="fa fa-chevron-down"></a>
+						<a href="javascript:;" class="fa fa-times"></a>
+					</span>
+				</header>
+				<div class="panel-body">
+					<div class="btn-group">
+						<button id="tjyh" class="btn btn-primary">
+							<a href="{% url 'user_add' %}">添加用户 <i class="fa fa-plus"></i></a>
+						</button>
+					</div>
+        			<div class="adv-table">
+		        		<table  class="display table  table-striped" id="dynamic-table111">
+				        	<thead>
+						        <tr>
+									<th class="text-center">系统用户</th>
+									<th class="text-center">用户角色</th>
+									<th class="text-center">角色操作</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for user in users %}
+								<tr>
+									<td class="text-center">{{user.username}}</td>
+									<td class="text-center">{% if user.is_superuser == 1 %}管理员{% else %}普通用户{% endif %}</td>
+									<td class="text-center">
+									{% if user.is_superuser == 1 %}
+										<a href="{% url 'manager_remove' %}?id={{user.id}}" class="btn btn-warning">撤销管理员</a>
+									{% else %}
+										<a href="{% url 'manager_appoint' %}?id={{user.id}}" class="btn btn-info">赋权管理员</a>
+									{% endif %}
+									<a href="{% url 'user_delete' %}?id={{user.id}}" class="btn btn-danger">删除用户</a>
+									</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block self_footer_js %}
+
+<script src="/static/js/jquery-1.12.1.min.js"></script>
+
+<!--dynamic table-->
+<script type="text/javascript" language="javascript" src="/static/js/advanced-datatable/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="/static/js/data-tables/DT_bootstrap.js"></script>
+<!--dynamic table initialization -->
+<script src="/static/js/dynamic_table_init.js"></script>
+{% endblock %}
